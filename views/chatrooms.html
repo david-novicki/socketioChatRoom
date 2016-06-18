@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Chatrooms</title>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.js"></script>
+	<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script> 
+	<script>
+	$(function(){
+		var host = '{{config.host}}';
+		var socket = io.connect('http://' + host + '/roomlist');
+		//alert(host);
+		
+		socket.on('connect', function(){
+			console.log('connection good');
+		})
+		
+		socket.on('roomupdate', function(data){
+			var procData = JSON.parse(data);
+			$('.roomlist').html();
+			for(var i = 0; i < procData.length; i++){
+				var str = '<a href="room/' + procData[i].room_number + '"><li>' + procData[i].room_name  + '</li></a>';
+				$('.roomlist').prepend(str);
+			}
+		})
+		
+		$(document).on('click', '#create', function(){
+			var room_name = $('.newRoom').val();
+			if(room_name != ''){
+				var room_number = parseInt(Math.random() * 10000);
+				socket.emit('newroom', {room_name:room_name, room_number:room_number});
+				$('.newRoom').val('');
+			}
+		})
+	})
+	</script>
+</head>
+<body>
+<div>
+<h1>Chat Room</h1>
+<div>
+ <img src="{{user.profilePic}}">
+ <h3>{{user.fullname}} | <a href="/logout">Logout</a></h3>
+</div>
+<div>
+	<input type="text" class="newRoom" autocomplete="off">
+	<button id="create">Create room</button>
+</div>
+<div>
+<ul class="roomlist">
+	<!-- 
+<a href="#"><li>Room1</li></a>
+	<a href="#"><li>Room2</li></a>
+	<a href="#"><li>Room3</li></a>
+ -->
+</ul>
+</div>
+
+</div>
+</body>
+</html>
